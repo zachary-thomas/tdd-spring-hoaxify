@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -43,7 +45,6 @@ public class UserControllerTest {
     // Single assertion or requirement per test
     @Test
     public void postUser_whenUserIsValid_receiveOk(){
-
         // given
         User user = createValidUser();
 
@@ -56,7 +57,6 @@ public class UserControllerTest {
 
     @Test
     public void postUser_whenUserIsValid_userSavedToDatabase(){
-
         // given
         User user = createValidUser();
 
@@ -69,7 +69,6 @@ public class UserControllerTest {
 
     @Test
     public void postUser_whenUserIsValid_receiveSuccessMessage(){
-
         // given
         User user = createValidUser();
 
@@ -79,6 +78,20 @@ public class UserControllerTest {
 
         // then
         assertThat(response.getBody().getMessage()).isNotNull();
+    }
+
+    @Test
+    public void postUser_whenUserIsValid_passwordIsHashedInDatabase(){
+        // given
+        User user = createValidUser();
+
+        // when
+        testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+
+        // then
+        List<User> users = userRepository.findAll();
+        User inDb = users.get(0);
+        assertThat(inDb.getPassword()).isNotEqualTo(user.getPassword());
     }
 
     private User createValidUser() {
