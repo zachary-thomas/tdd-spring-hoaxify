@@ -49,7 +49,7 @@ public class UserControllerTest {
         User user = createValidUser();
 
         // when
-        ResponseEntity<Object> response = testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+        ResponseEntity<Object> response = postSignup(user, Object.class);
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -61,7 +61,7 @@ public class UserControllerTest {
         User user = createValidUser();
 
         // when
-        testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+        postSignup(user, Object.class);
 
         // then
         assertThat(userRepository.count()).isEqualTo(1);
@@ -74,7 +74,7 @@ public class UserControllerTest {
 
         // when
         ResponseEntity<GenericResponse> response =
-                testRestTemplate.postForEntity(API_1_0_USERS, user, GenericResponse.class);
+                postSignup(user, GenericResponse.class);
 
         // then
         assertThat(response.getBody().getMessage()).isNotNull();
@@ -86,12 +86,17 @@ public class UserControllerTest {
         User user = createValidUser();
 
         // when
-        testRestTemplate.postForEntity(API_1_0_USERS, user, Object.class);
+        postSignup(user, Object.class);
 
         // then
         List<User> users = userRepository.findAll();
         User inDb = users.get(0);
         assertThat(inDb.getPassword()).isNotEqualTo(user.getPassword());
+    }
+
+
+    public  <T> ResponseEntity<T> postSignup(Object request, Class<T> response){
+        return testRestTemplate.postForEntity(API_1_0_USERS, request, response);
     }
 
     private User createValidUser() {
