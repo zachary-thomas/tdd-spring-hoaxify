@@ -4,6 +4,7 @@ import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserRepository;
+import io.swagger.annotations.Api;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -18,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -259,15 +261,85 @@ public class UserControllerTest {
     @Test
     public void postUser_whenUserIsInvalid_receiveApiError(){
         User user = new User();
+
         ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+
         assertThat(response.getBody().getUrl()).isEqualTo(API_1_0_USERS);
     }
 
     @Test
     public void postUser_whenUserIsInvalid_receiveApiErrorWithValidationErrors(){
         User user = new User();
+
         ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+
         assertThat(response.getBody().getValidationErrors().size()).isEqualTo(3);
+    }
+
+    @Test
+    public void postUser_whenUserHasNullUsername_receiveMessageOfNullErrorForUsername(){
+        User user = createValidUser();
+        user.setUsername(null);
+
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+
+        Map<String, String> validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("username")).isEqualTo("Username cannot be null");
+    }
+
+    @Test
+    public void postUser_whenUserHasNullPassword_receiveMessageOfNullError(){
+        User user = createValidUser();
+        user.setPassword(null);
+
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+
+        Map<String, String> validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("password")).isEqualTo("Cannot be null");
+    }
+
+    @Test
+    public void postUser_whenUserHasInvalidLengthUsername_receiveGenericMessageOfSizeError(){
+        User user = createValidUser();
+        user.setUsername("abc");
+
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+
+        Map<String, String> validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("username")).isEqualTo("It must have minimum 4 and maximum 255 characters");
+    }
+
+    @Test
+    public void postUser_whenUserHasInvalidPasswordPattern_receiveMessageOfPasswordPatternError(){
+        User user = createValidUser();
+        user.setPassword("alllowercase");
+
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+
+        Map<String, String> validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("password"))
+                .isEqualTo("Password must have at least one uppercase, one lowercase letter and one number");
+    }
+
+    @Test
+    public void postUser_whenAnotherUserHasSameUsername_receiveBadRequest(){
+        userRepository.save(createValidUser());
+        User user = createValidUser();
+
+        ResponseEntity<Object> response = postSignup(user, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void postUser_whenAnotherUserHasSameUsername_receiveMessageOfDuplicateUsername(){
+        userRepository.save(createValidUser());
+        User user = createValidUser();
+
+        ResponseEntity<ApiError> response = postSignup(user, ApiError.class);
+
+        Map<String, String> validationErrors = response.getBody().getValidationErrors();
+        assertThat(validationErrors.get("username")).isEqualTo("This name is in use");
     }
 
     public  <T> ResponseEntity<T> postSignup(Object request, Class<T> response){

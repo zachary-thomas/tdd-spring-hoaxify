@@ -5,3 +5,13 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  jpa:
+    properties:
+      javax:
+        persistence:
+          validation:
+            # needed because we have a custom annotation that
+            # already validates the object when it is passed
+            # to the application
+            mode: none
+
