@@ -5,7 +5,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
 // exclude security for now, until implementation is ready
-@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
+@SpringBootApplication
+//(exclude = SecurityAutoConfiguration.class)
 public class HoaxifyApplication {
 
 	public static void main(String[] args) {

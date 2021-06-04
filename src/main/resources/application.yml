@@ -1,7 +1,7 @@
 spring:
   datasource:
     generate-unique-name: false
-  h2:
+    h2:
     console:
       enabled: true
       path: /h2-console
@@ -14,4 +14,3 @@ spring:
             # already validates the object when it is passed
             # to the application
             mode: none
-
