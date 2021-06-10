@@ -9,6 +9,7 @@ public class TestUtil {
                 .displayName("test-display")
                 .username("test-user")
                 .password("P4ssword")
+                .image("profile-image.png")
                 .build();
     }
 }

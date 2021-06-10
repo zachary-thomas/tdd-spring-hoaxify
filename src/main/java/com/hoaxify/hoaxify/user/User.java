@@ -1,5 +1,8 @@
 package com.hoaxify.hoaxify.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +31,7 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue
+    @JsonView(Views.Base.class)
     private long id;
 
     // moved to Validation.Messages.properties file
@@ -35,17 +39,25 @@ public class User implements UserDetails {
     //@NotNull(message = "Username cannot be null")
     @Size(min = 4, max = 255)
     @UniqueUsername
+    @JsonView(Views.Base.class)
     private String username;
 
     @NotNull
     @Size(min = 4, max = 255)
+    @JsonView(Views.Base.class)
     private String displayName;
 
     @NotNull
     @Size(min = 8, max = 255)
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$",
             message = "{hoaxify.constraints.password.Pattern.message}")
+    // Won't work in our use case because it gets rid of receive and response
+    // Use JsonView to just remove in response.
+    //@JsonIgnore
     private String password;
+
+    @JsonView(Views.Base.class)
+    private String image;
 
     @Override
     // Not in db
