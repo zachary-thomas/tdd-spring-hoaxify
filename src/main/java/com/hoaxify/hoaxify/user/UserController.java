@@ -3,6 +3,7 @@ package com.hoaxify.hoaxify.user;
 import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.shared.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 
 // Methods to handle http requests
 @RestController
+@RequestMapping("/api/1.0")
 public class UserController {
 
     // Field injection for controllers
@@ -22,7 +24,8 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @PostMapping("/api/1.0/users")
+    //@PostMapping("/api/1.0/users")
+    @PostMapping("/users")
     GenericResponse createUser(@Valid @RequestBody User user){
 
         // Don't need validations with @Valid annotation and
@@ -32,6 +35,11 @@ public class UserController {
 //        }
         userService.save(user);
         return new GenericResponse("User saved");
+    }
+
+    @GetMapping("/users")
+    Page<?> getUsers(){
+        return userService.getUsers();
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
