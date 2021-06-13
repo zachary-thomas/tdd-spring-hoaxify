@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 
 import java.io.IOException;
 
+// Used for custom json return for user.
+// Not needed because we use the UserVM.
 @Configuration
 public class SerializationConfiguration {
 

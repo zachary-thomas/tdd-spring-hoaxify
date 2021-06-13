@@ -3,6 +3,7 @@ package com.hoaxify.hoaxify.user;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.shared.CurrentUser;
+import com.hoaxify.hoaxify.user.vm.UserVM;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -20,10 +21,11 @@ import java.util.Map;
 public class LoginController {
 
     @PostMapping("/api/1.0/login")
-    @JsonView(Views.Base.class)
-    User handleLogin(@CurrentUser User loggedInUser){
+        // We don't need JsonView because of the user vm/dto converter to remove the password
+    //@JsonView(Views.Base.class)
+    UserVM handleLogin(@CurrentUser User loggedInUser){
         //User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return loggedInUser;
+        return new UserVM(loggedInUser);
     }
 
     // Will not hit because spring security handles before the controller

@@ -31,7 +31,10 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue
-    @JsonView(Views.Base.class)
+    // JsonView is just an example
+    // we use UserVM as a better solution
+    // to only send those fields
+    //@JsonView(Views.Base.class)
     private long id;
 
     // moved to Validation.Messages.properties file
@@ -39,12 +42,12 @@ public class User implements UserDetails {
     //@NotNull(message = "Username cannot be null")
     @Size(min = 4, max = 255)
     @UniqueUsername
-    @JsonView(Views.Base.class)
+    //@JsonView(Views.Base.class)
     private String username;
 
     @NotNull
     @Size(min = 4, max = 255)
-    @JsonView(Views.Base.class)
+    //@JsonView(Views.Base.class)
     private String displayName;
 
     @NotNull
@@ -56,7 +59,7 @@ public class User implements UserDetails {
     //@JsonIgnore
     private String password;
 
-    @JsonView(Views.Base.class)
+    //@JsonView(Views.Base.class)
     private String image;
 
     @Override
