@@ -14,3 +14,11 @@ spring:
             # already validates the object when it is passed
             # to the application
             mode: none
+# Give custom page query options
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 100
+#        page-parameter: currentPage
+#        size-parameter: pageSize

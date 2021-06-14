@@ -1,17 +1,15 @@
 package com.hoaxify.hoaxify.user;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.vm.UserVM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.GeneratedValue;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -28,7 +26,7 @@ public class UserController {
 
     //@PostMapping("/api/1.0/users")
     @PostMapping("/users")
-    GenericResponse createUser(@Valid @RequestBody User user){
+    GenericResponse createUser(@Valid @RequestBody User user) {
 
         // Don't need validations with @Valid annotation and
         // with bean validations in the class, ie @NotNull
@@ -40,15 +38,18 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    //@JsonView(Views.Base.class)
-    Page<UserVM> getUsers(){
+        //@JsonView(Views.Base.class)
+//    Page<UserVM> getUsers(@RequestParam(required = false, defaultValue = "0") int currentPage,
+//                          @RequestParam(required = false, defaultValue = "20") int pageSize) {
+
+    Page<UserVM> getUsers(Pageable pageable) {
         // Convert using the user dto
-        return userService.getUsers().map((user) -> new UserVM(user));
+        return userService.getUsers(pageable).map((user) -> new UserVM(user));
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ApiError handleValidationException(MethodArgumentNotValidException exception, HttpServletRequest request){
+    ApiError handleValidationException(MethodArgumentNotValidException exception, HttpServletRequest request) {
         ApiError apiError = new ApiError(400, "Validation error", request.getServletPath());
 
         // Message errors come from binding result object
