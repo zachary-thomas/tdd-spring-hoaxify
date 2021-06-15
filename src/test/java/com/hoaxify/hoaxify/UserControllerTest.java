@@ -4,6 +4,7 @@ import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserRepository;
+import com.hoaxify.hoaxify.user.UserService;
 import io.swagger.annotations.Api;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -46,9 +48,17 @@ public class UserControllerTest {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    UserService userService;
+
     @Before
     public void cleanUp(){
         userRepository.deleteAll();
+
+        // there must be this interceptor clear part so that each test will start with
+        // non authenticated testRestTemplate this is missing. I couldn't find where we
+        // add this but, it must be added after a fail we see running all tests in one of the previous sections
+        testRestTemplate.getRestTemplate().getInterceptors().clear();
     }
 
     // Single assertion or requirement per test
@@ -428,6 +438,24 @@ public class UserControllerTest {
                 getUsers(path, new ParameterizedTypeReference<TestPage<Object>>() {});
 
         assertThat(response.getBody().getNumber()).isEqualTo(0);
+    }
+
+    @Test
+    public void getUsers_whenUserLoggedIn_receivePageWIthoutLoggedInUser(){
+        userService.save(TestUtil.createValidUser("user1"));
+        userService.save(TestUtil.createValidUser("user2"));
+        userService.save(TestUtil.createValidUser("user3"));
+        authenticate("user1");
+
+        ResponseEntity<TestPage<Object>> response =
+                getUsers(new ParameterizedTypeReference<TestPage<Object>>() {});
+
+        assertThat(response.getBody().getTotalElements()).isEqualTo(2);
+    }
+
+    private void authenticate(String username) {
+        testRestTemplate.getRestTemplate().getInterceptors()
+                .add(new BasicAuthenticationInterceptor(username, "P4ssword"));
     }
 
     public  <T> ResponseEntity<T> postSignup(Object request, Class<T> response){

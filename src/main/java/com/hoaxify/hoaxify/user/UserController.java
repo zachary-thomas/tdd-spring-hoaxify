@@ -1,6 +1,7 @@
 package com.hoaxify.hoaxify.user;
 
 import com.hoaxify.hoaxify.error.ApiError;
+import com.hoaxify.hoaxify.shared.CurrentUser;
 import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.vm.UserVM;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +43,9 @@ public class UserController {
 //    Page<UserVM> getUsers(@RequestParam(required = false, defaultValue = "0") int currentPage,
 //                          @RequestParam(required = false, defaultValue = "20") int pageSize) {
 
-    Page<UserVM> getUsers(Pageable pageable) {
+    Page<UserVM> getUsers(@CurrentUser User loggedInUser, Pageable pageable) {
         // Convert using the user dto
-        return userService.getUsers(pageable).map((user) -> new UserVM(user));
+        return userService.getUsers(loggedInUser, pageable).map((user) -> new UserVM(user));
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})

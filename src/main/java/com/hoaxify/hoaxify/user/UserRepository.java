@@ -13,6 +13,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsernameAndDisplayName(String username, String displayName);
     User findByUsername(String username);
 
+    Page<User> findByUsernameNot(String username, Pageable page);
+
     // Find all is taken, so we have to write a query.
     // We also use another method other than Views to return
     // the user object without the password field.
