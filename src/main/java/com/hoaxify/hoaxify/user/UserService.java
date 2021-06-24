@@ -1,12 +1,9 @@
 package com.hoaxify.hoaxify.user;
 
-import com.hoaxify.hoaxify.error.DuplicateUsernameException;
 import com.hoaxify.hoaxify.error.NotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.hoaxify.hoaxify.user.vm.UserUpdateVM;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -50,5 +47,11 @@ public class UserService {
             throw new NotFoundException(username + " not found");
         }
         return inDb;
+    }
+
+    public User update(long id, UserUpdateVM userUpdateVM) {
+        User inDb = userRepository.getOne(id);
+        inDb.setDisplayName(userUpdateVM.getDisplayName());
+        return userRepository.save(inDb);
     }
 }

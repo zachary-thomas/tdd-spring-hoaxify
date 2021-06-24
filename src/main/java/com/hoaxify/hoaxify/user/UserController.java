@@ -3,6 +3,7 @@ package com.hoaxify.hoaxify.user;
 import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.shared.CurrentUser;
 import com.hoaxify.hoaxify.shared.GenericResponse;
+import com.hoaxify.hoaxify.user.vm.UserUpdateVM;
 import com.hoaxify.hoaxify.user.vm.UserVM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -57,8 +58,9 @@ public class UserController {
     @PutMapping("/users/{id:[0-9]+}")
     // Compare current logged in user with id passed
     @PreAuthorize("#id == principal.id")
-    void updateUser(@PathVariable long id){
-
+    UserVM updateUser(@PathVariable long id, @RequestBody (required = false) UserUpdateVM userUpdateVM){
+        User user = userService.update(id, userUpdateVM);
+        return new UserVM(user);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})

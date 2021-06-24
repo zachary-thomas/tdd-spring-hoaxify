@@ -5,7 +5,10 @@ import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserRepository;
 import com.hoaxify.hoaxify.user.UserService;
+import com.hoaxify.hoaxify.user.vm.UserUpdateVM;
+import com.hoaxify.hoaxify.user.vm.UserVM;
 import io.swagger.annotations.Api;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -526,7 +529,50 @@ public class UserControllerTest {
         assertThat(response.getBody().getUrl()).contains("users/" + anotherUserId);
     }
 
-    public <T> ResponseEntity<T> putUser(long id, HttpEntity<T> requestEntity, Class<T> responseType){
+    @Test
+    public void putUser_whenValidRequestBodyFromAuthorizedUser_receiveOk(){
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate(user.getUsername());
+        UserUpdateVM updatedUser = createValidUserUpdateVM();
+
+        HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updatedUser);
+        ResponseEntity<Object> response = putUser(user.getId(), requestEntity, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void putUser_whenValidRequestBodyFromAuthorizedUser_displayNameUpdated(){
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate(user.getUsername());
+        UserUpdateVM updatedUser = createValidUserUpdateVM();
+
+        HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updatedUser);
+        putUser(user.getId(), requestEntity, Object.class);
+
+        User inDb = userRepository.findByUsername("user1");
+        assertThat(inDb.getDisplayName()).isEqualTo(updatedUser.getDisplayName());
+    }
+
+    @Test
+    public void putUser_whenValidRequestBodyFromAuthorizedUser_receiveUserVMWIthUpdatedDisplayName(){
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate(user.getUsername());
+        UserUpdateVM updatedUser = createValidUserUpdateVM();
+
+        HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updatedUser);
+        ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
+
+        assertThat(response.getBody().getDisplayName()).isEqualTo(updatedUser.getDisplayName());
+    }
+
+    private UserUpdateVM createValidUserUpdateVM() {
+        UserUpdateVM updatedUser = new UserUpdateVM();
+        updatedUser.setDisplayName("newDisplayName");
+        return updatedUser;
+    }
+
+    public <T> ResponseEntity<T> putUser(long id, HttpEntity<?> requestEntity, Class<T> responseType){
         String path = API_1_0_USERS + "/" + id;
         return testRestTemplate.exchange(path, HttpMethod.PUT, requestEntity, responseType);
     }
