@@ -20,7 +20,7 @@ public class HoaxifyApplication {
     }
 
     @Bean
-    @Profile("!test")
+    @Profile("dev")
         // Executed after application is initialized
         // not for tests.
     CommandLineRunner run(UserService userService) {
