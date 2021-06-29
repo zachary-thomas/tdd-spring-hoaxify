@@ -11,12 +11,12 @@ public class AppConfiguration {
 
     String uploadPath;
 
-    String profileImagesPath = "profile";
+    String profileImagesFolder = "profile";
 
     String attachmentsFolder = "attachments";
 
     public String getFullProfileImagesPath() {
-        return this.uploadPath + "/" + this.profileImagesPath;
+        return this.uploadPath + "/" + this.profileImagesFolder;
     }
 
     public String getFullAttachmentsPath() {
