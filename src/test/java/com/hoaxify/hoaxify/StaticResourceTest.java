@@ -114,4 +114,6 @@ public class StaticResourceTest {
         assertThat(cacheControl).containsIgnoringCase("max-age=31536000");
     }
 
+
+
 }

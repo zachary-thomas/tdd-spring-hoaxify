@@ -1,5 +1,6 @@
 package com.hoaxify.hoaxify;
 
+import com.hoaxify.hoaxify.configuration.AppConfiguration;
 import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.User;
@@ -8,6 +9,7 @@ import com.hoaxify.hoaxify.user.UserService;
 import com.hoaxify.hoaxify.user.vm.UserUpdateVM;
 import com.hoaxify.hoaxify.user.vm.UserVM;
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +26,7 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
@@ -53,6 +56,9 @@ public class UserControllerTest {
     @Autowired
     UserService userService;
 
+    @Autowired
+    AppConfiguration appConfiguration;
+
     @Before
     public void cleanUp() {
         userRepository.deleteAll();
@@ -61,6 +67,12 @@ public class UserControllerTest {
         // non authenticated testRestTemplate this is missing. I couldn't find where we
         // add this but, it must be added after a fail we see running all tests in one of the previous sections
         testRestTemplate.getRestTemplate().getInterceptors().clear();
+    }
+
+    @After
+    public void cleanDirectory() throws IOException {
+        FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagesPath()));
+        FileUtils.cleanDirectory(new File(appConfiguration.getFullAttachmentsPath()));
     }
 
     // Single assertion or requirement per test
@@ -579,17 +591,34 @@ public class UserControllerTest {
         User user = userService.save(TestUtil.createValidUser("user1"));
         authenticate(user.getUsername());
         UserUpdateVM updatedUser = createValidUserUpdateVM();
-
-        ClassPathResource imageResource = new ClassPathResource("profile.png");
-
-        byte[] imageArray = FileUtils.readFileToByteArray(imageResource.getFile());
-        String imageString = Base64.getEncoder().encodeToString(imageArray);
-        updatedUser.setImage(imageString);
+        String imageString = readFileToBase64("profile.png");
 
         HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updatedUser);
         ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
 
         assertThat(response.getBody().getImage()).isNotEqualTo("profile-image.png");
+    }
+
+    @Test
+    public void putUser_withValidRequestBodyWithSupporedImageFromAuthUser_imageIsStoredUnderProfileFolder() throws IOException {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate(user.getUsername());
+        UserUpdateVM updatedUser = createValidUserUpdateVM();
+        String imageString = readFileToBase64("profile.png");
+
+        HttpEntity<UserUpdateVM> requestEntity = new HttpEntity<>(updatedUser);
+        ResponseEntity<UserVM> response = putUser(user.getId(), requestEntity, UserVM.class);
+        String storedImageName = response.getBody().getImage();
+        String profilePicturePath = appConfiguration.getFullProfileImagesPath() + "/" + storedImageName;
+        File storedImage = new File(profilePicturePath);
+
+        assertThat(storedImage.exists()).isTrue();
+    }
+
+    private String readFileToBase64(String fileName) throws IOException {
+        ClassPathResource imageResource = new ClassPathResource("profile.png");
+        byte[] imageArray = FileUtils.readFileToByteArray(imageResource.getFile());
+        return Base64.getEncoder().encodeToString(imageArray);
     }
 
     private UserUpdateVM createValidUserUpdateVM() {
