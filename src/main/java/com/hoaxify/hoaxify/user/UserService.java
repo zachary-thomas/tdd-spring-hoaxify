@@ -58,16 +58,6 @@ public class UserService {
         return inDb;
     }
 
-//    public User update(long id, UserUpdateVM userUpdateVM) {
-//        User inDb = userRepository.getOne(id);
-//        inDb.setDisplayName(userUpdateVM.getDisplayName());
-//
-//        String savedImageName = inDb.getUsername() + UUID.randomUUID().toString().replaceAll("-", "");
-//        inDb.setImage(savedImageName);
-//
-//        return userRepository.save(inDb);
-//    }
-
     public User update(long id, UserUpdateVM userUpdateVM) {
         User inDb = userRepository.getOne(id);
         inDb.setDisplayName(userUpdateVM.getDisplayName());
@@ -77,6 +67,7 @@ public class UserService {
 
             try {
                 savedImageName = fileService.saveProfileImage(userUpdateVM.getImage());
+                fileService.deleteProfileImage(inDb.getImage());
                 inDb.setImage(savedImageName);
             } catch (IOException e) {
                 e.printStackTrace();
