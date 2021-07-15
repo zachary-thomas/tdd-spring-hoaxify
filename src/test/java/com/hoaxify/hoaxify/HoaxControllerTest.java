@@ -17,6 +17,9 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -96,6 +99,64 @@ public class HoaxControllerTest {
         Hoax inDb = hoaxRepository.findAll().get(0);
 
         assertThat(inDb.getTimestamp()).isNotNull();
+    }
+
+    @Test
+    public void postHoax_whenHoaxContentIsNullAndUserIsAuthorized_receiveBadRequest(){
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = new Hoax();
+
+        ResponseEntity<Object> response = postHoax(hoax, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void postHoax_whenHoaxContentIsLessThan10CharsAndUserIsAuthorized_receiveBadRequest(){
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = new Hoax();
+        hoax.setContent("123456789");
+
+        ResponseEntity<Object> response = postHoax(hoax, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void postHoax_whenHoaxContentIs5000CharsAndUserIsAuthorized_receiveOk(){
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = new Hoax();
+        hoax.setContent(IntStream.rangeClosed(1, 5000).mapToObj(i -> "x").collect(Collectors.joining()));
+
+        ResponseEntity<Object> response = postHoax(hoax, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void postHoax_whenHoaxContentIsMoreThan5000CharsAndUserIsAuthorized_receiveBadRequest(){
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = new Hoax();
+        hoax.setContent(IntStream.rangeClosed(1, 5001).mapToObj(i -> "x").collect(Collectors.joining()));
+
+        ResponseEntity<Object> response = postHoax(hoax, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    public void postHoax_whenHoaxContentIsNullAndUserIsAuthorized_receiveApiErrorWithValidationErrors(){
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = new Hoax();
+
+        ResponseEntity<ApiError> response = postHoax(hoax, ApiError.class);
+
+        assertThat(response.getBody().getValidationErrors().get("content")).isNotNull();
     }
 
     private <T> ResponseEntity<T> postHoax(Hoax hoax, Class<T> responseType) {
