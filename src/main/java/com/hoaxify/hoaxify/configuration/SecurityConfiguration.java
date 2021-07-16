@@ -24,6 +24,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
 
+        http.headers().disable();
+
         // remove WWW-Authentication header
         http.httpBasic().authenticationEntryPoint(new BasicAuthenticationEntryPoint());
 

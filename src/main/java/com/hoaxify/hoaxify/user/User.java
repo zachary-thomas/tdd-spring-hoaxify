@@ -3,6 +3,7 @@ package com.hoaxify.hoaxify.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.hoaxify.hoaxify.hoax.Hoax;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ import javax.validation.constraints.Size;
 import java.util.Collection;
 
 import java.beans.Transient;
+import java.util.List;
 
 // Getters, setters, constructor,
 // equals, hashcode, toString
@@ -68,6 +70,9 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return AuthorityUtils.createAuthorityList("Role_User");
     }
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private List<Hoax> hoaxes;
 
     @Override
     @Transient

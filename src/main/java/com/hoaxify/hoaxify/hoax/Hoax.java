@@ -1,5 +1,6 @@
 package com.hoaxify.hoaxify.hoax;
 
+import com.hoaxify.hoaxify.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,4 +29,7 @@ public class Hoax {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date timestamp;
+
+    @ManyToOne
+    private User user;
 }
