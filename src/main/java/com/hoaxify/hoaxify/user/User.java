@@ -71,7 +71,8 @@ public class User implements UserDetails {
         return AuthorityUtils.createAuthorityList("Role_User");
     }
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user")
+    // fetch = FetchType.EAGER
     private List<Hoax> hoaxes;
 
     @Override

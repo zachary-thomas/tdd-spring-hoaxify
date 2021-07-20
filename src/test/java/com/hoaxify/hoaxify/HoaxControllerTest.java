@@ -18,7 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.transaction.TestTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,6 +47,9 @@ public class HoaxControllerTest {
 
     @Autowired
     HoaxRepository hoaxRepository;
+
+    @PersistenceUnit
+    private EntityManagerFactory entityManagerFactory;
 
     @Before
     public void cleanUp() {
@@ -181,14 +189,34 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity(){
+    // Open transaction to lazy load hoax entries
+    @Transactional
+    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity_transactional(){
         userService.save(TestUtil.createValidUser("user1"));
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
         authenticate("user1");
         Hoax hoax = TestUtil.createValidHoax();
 
         postHoax(hoax, Object.class);
 
+        TestTransaction.start();
         User inDb = userRepository.findByUsername("user1");
+        assertThat(inDb.getHoaxes().size()).isEqualTo(1);
+    }
+
+    // Another way to bypass lazy load in test is to use the EntityManager
+    @Test
+    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity(){
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = TestUtil.createValidHoax();
+
+        postHoax(hoax, Object.class);
+
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+
+        User inDb = entityManager.find(User.class, user.getId());
         assertThat(inDb.getHoaxes().size()).isEqualTo(1);
     }
 
