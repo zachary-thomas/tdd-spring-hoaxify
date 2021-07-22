@@ -3,16 +3,18 @@ package com.hoaxify.hoaxify;
 import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.hoax.Hoax;
 import com.hoaxify.hoaxify.hoax.HoaxRepository;
+import com.hoaxify.hoaxify.hoax.HoaxService;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserRepository;
 import com.hoaxify.hoaxify.user.UserService;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
@@ -48,6 +50,9 @@ public class HoaxControllerTest {
     @Autowired
     HoaxRepository hoaxRepository;
 
+    @Autowired
+    HoaxService hoaxService;
+
     @PersistenceUnit
     private EntityManagerFactory entityManagerFactory;
 
@@ -65,7 +70,7 @@ public class HoaxControllerTest {
 //    }
 
     @Test
-    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_receiveOk(){
+    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_receiveOk() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = TestUtil.createValidHoax();
@@ -76,7 +81,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxIsValidAndUserIsUnAuthorized_receiveUnauthorized(){
+    public void postHoax_whenHoaxIsValidAndUserIsUnAuthorized_receiveUnauthorized() {
         Hoax hoax = TestUtil.createValidHoax();
 
         ResponseEntity<Object> response = postHoax(hoax, Object.class);
@@ -85,7 +90,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxIsValidAndUserIsUnAuthorized_receiveApiError(){
+    public void postHoax_whenHoaxIsValidAndUserIsUnAuthorized_receiveApiError() {
         Hoax hoax = TestUtil.createValidHoax();
 
         ResponseEntity<ApiError> response = postHoax(hoax, ApiError.class);
@@ -94,7 +99,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedToDB(){
+    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedToDB() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = TestUtil.createValidHoax();
@@ -105,7 +110,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedToDBWithTimestamp(){
+    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedToDBWithTimestamp() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = TestUtil.createValidHoax();
@@ -118,7 +123,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxContentIsNullAndUserIsAuthorized_receiveBadRequest(){
+    public void postHoax_whenHoaxContentIsNullAndUserIsAuthorized_receiveBadRequest() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = new Hoax();
@@ -129,7 +134,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxContentIsLessThan10CharsAndUserIsAuthorized_receiveBadRequest(){
+    public void postHoax_whenHoaxContentIsLessThan10CharsAndUserIsAuthorized_receiveBadRequest() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = new Hoax();
@@ -141,7 +146,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxContentIs5000CharsAndUserIsAuthorized_receiveOk(){
+    public void postHoax_whenHoaxContentIs5000CharsAndUserIsAuthorized_receiveOk() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = new Hoax();
@@ -153,7 +158,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxContentIsMoreThan5000CharsAndUserIsAuthorized_receiveBadRequest(){
+    public void postHoax_whenHoaxContentIsMoreThan5000CharsAndUserIsAuthorized_receiveBadRequest() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = new Hoax();
@@ -165,7 +170,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxContentIsNullAndUserIsAuthorized_receiveApiErrorWithValidationErrors(){
+    public void postHoax_whenHoaxContentIsNullAndUserIsAuthorized_receiveApiErrorWithValidationErrors() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = new Hoax();
@@ -176,7 +181,7 @@ public class HoaxControllerTest {
     }
 
     @Test
-    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedWithAuthenticatedUserInfo(){
+    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxSavedWithAuthenticatedUserInfo() {
         userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = TestUtil.createValidHoax();
@@ -191,7 +196,7 @@ public class HoaxControllerTest {
     @Test
     // Open transaction to lazy load hoax entries
     @Transactional
-    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity_transactional(){
+    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity_transactional() {
         userService.save(TestUtil.createValidUser("user1"));
         TestTransaction.flagForCommit();
         TestTransaction.end();
@@ -207,7 +212,7 @@ public class HoaxControllerTest {
 
     // Another way to bypass lazy load in test is to use the EntityManager
     @Test
-    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity(){
+    public void postHoax_whenHoaxIsValidAndUserIsAuthorized_hoaxCanBeAccessedFromUserEntity() {
         User user = userService.save(TestUtil.createValidUser("user1"));
         authenticate("user1");
         Hoax hoax = TestUtil.createValidHoax();
@@ -218,6 +223,34 @@ public class HoaxControllerTest {
 
         User inDb = entityManager.find(User.class, user.getId());
         assertThat(inDb.getHoaxes().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void getHoaxes_whenThereAreNoHoaxes_receiveOk() {
+        ResponseEntity<Object> response = getHoaxes(new ParameterizedTypeReference<Object>() {});
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void getHoaxes_whenThereAreNoHoaxes_receivePageWithZeroItems() {
+        ResponseEntity<TestPage<Object>> response = getHoaxes(new ParameterizedTypeReference<TestPage<Object>>() {});
+        assertThat(response.getBody().getTotalElements()).isEqualTo(0);
+    }
+
+    @Test
+    public void getHoaxes_whenThereAreHoaxes_receivePageWithItems() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        hoaxService.save(TestUtil.createValidHoax(), user);
+        hoaxService.save(TestUtil.createValidHoax(), user);
+        hoaxService.save(TestUtil.createValidHoax(), user);
+
+        ResponseEntity<TestPage<Object>> response = getHoaxes(new ParameterizedTypeReference<TestPage<Object>>() {});
+
+        assertThat(response.getBody().getTotalElements()).isEqualTo(3);
+    }
+
+    public <T> ResponseEntity<T> getHoaxes(ParameterizedTypeReference<T> responseType) {
+        return testRestTemplate.exchange(API_1_0_HOAXES, HttpMethod.GET, null, responseType);
     }
 
     private <T> ResponseEntity<T> postHoax(Hoax hoax, Class<T> responseType) {
