@@ -16,10 +16,10 @@ public class HoaxService {
         this.hoaxRepository = hoaxRepository;
     }
 
-    public void save(Hoax hoax, User user){
+    public Hoax save(Hoax hoax, User user){
         hoax.setTimestamp(new Date());
         hoax.setUser(user);
-        hoaxRepository.save(hoax);
+        return hoaxRepository.save(hoax);
     }
 
     public Page<Hoax> getAllHoaxes(Pageable pageable) {

@@ -17,13 +17,13 @@ public class HoaxController {
     HoaxService hoaxService;
 
     @PostMapping("/hoaxes")
-    void createHoax(@Valid @RequestBody Hoax hoax, @CurrentUser User user) {
-        hoaxService.save(hoax, user);
+    HoaxVM createHoax(@Valid @RequestBody Hoax hoax, @CurrentUser User user) {
+        return new HoaxVM(hoaxService.save(hoax, user));
     }
 
     @GetMapping("/hoaxes")
-    Page<?> getHoaxes(Pageable pageable) {
-        return hoaxService.getAllHoaxes(pageable);
+    Page<HoaxVM> getHoaxes(Pageable pageable) {
+        return hoaxService.getAllHoaxes(pageable).map(HoaxVM::new);
     }
 
 }
