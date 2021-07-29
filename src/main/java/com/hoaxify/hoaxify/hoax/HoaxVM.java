@@ -22,4 +22,5 @@ public class HoaxVM {
         this.setDate(hoax.getTimestamp().getTime());
         this.setUser(new UserVM(hoax.getUser()));
     }
+
 }

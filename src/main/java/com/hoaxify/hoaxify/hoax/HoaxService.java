@@ -34,4 +34,8 @@ public class HoaxService {
         User inDb = userService.getByUsername(username);
         return hoaxRepository.findByUser(inDb, pageable);
     }
+
+    public Page<Hoax> getOldHoaxes(long id, Pageable pageable) {
+        return hoaxRepository.findByIdLessThan(id, pageable);
+    }
 }

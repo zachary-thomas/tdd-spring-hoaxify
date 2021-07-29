@@ -11,6 +11,8 @@ public interface HoaxRepository extends JpaRepository<Hoax, Long> {
 
     Page<Hoax> findByUserUsername(String username, Pageable pageable);
 
+    Page<Hoax> findByIdLessThan(long id, Pageable pageable);
+
     long countByUserUsername(String username);
 
 }
