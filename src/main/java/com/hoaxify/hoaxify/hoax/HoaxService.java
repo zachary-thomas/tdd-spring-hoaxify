@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.channels.FileChannel;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class HoaxService {
@@ -43,5 +44,9 @@ public class HoaxService {
     public Page<Hoax> getHoaxesRelativeForUser(String username, long id, Pageable pageable) {
         User inDb = userService.getByUsername(username);
         return hoaxRepository.findByIdLessThanAndUser(id, inDb, pageable);
+    }
+
+    public List<Hoax> getNewHoaxes(long id, Pageable pageable) {
+        return hoaxRepository.findByIdGreaterThan(id, pageable.getSort());
     }
 }
