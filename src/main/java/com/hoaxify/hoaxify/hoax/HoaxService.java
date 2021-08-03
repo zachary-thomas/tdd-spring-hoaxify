@@ -49,4 +49,10 @@ public class HoaxService {
     public List<Hoax> getNewHoaxes(long id, Pageable pageable) {
         return hoaxRepository.findByIdGreaterThan(id, pageable.getSort());
     }
+
+    public List<Hoax> getNewHoaxesOfUser(long id, String username, Pageable pageable) {
+        return hoaxRepository.findByIdGreaterThanAndUser(id,
+                userService.getByUsername(username),
+                pageable.getSort());
+    }
 }
