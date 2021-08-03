@@ -510,17 +510,6 @@ public class HoaxControllerTest {
         assertThat(response.getBody().get(0).getDate()).isGreaterThan(0);
     }
 
-
-
-
-
-
-
-
-
-
-
-
     @Test
     public void getNewHoaxes_whenThereAreNoHoaxes_receiveOk() {
         ResponseEntity<Object> response =
