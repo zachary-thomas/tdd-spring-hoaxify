@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.nio.channels.FileChannel;
 import java.util.Date;
 import java.util.List;
 
@@ -54,5 +53,13 @@ public class HoaxService {
         return hoaxRepository.findByIdGreaterThanAndUser(id,
                 userService.getByUsername(username),
                 pageable.getSort());
+    }
+
+    public long getNewHoaxesCount(long id) {
+        return hoaxRepository.countByIdGreaterThan(id);
+    }
+
+    public long getNewHoaxesCountOfUser(long id, String username) {
+        return hoaxRepository.countByIdGreaterThanAndUser(id, userService.getByUsername(username));
     }
 }

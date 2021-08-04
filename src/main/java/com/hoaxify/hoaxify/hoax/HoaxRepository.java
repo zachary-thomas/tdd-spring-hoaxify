@@ -24,4 +24,8 @@ public interface HoaxRepository extends JpaRepository<Hoax, Long> {
 
     long countByUserUsername(String username);
 
+    long countByIdGreaterThan(long id);
+
+    long countByIdGreaterThanAndUser(long id, User user);
+
 }
