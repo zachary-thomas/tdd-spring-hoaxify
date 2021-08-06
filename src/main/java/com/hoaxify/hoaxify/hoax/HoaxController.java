@@ -34,41 +34,23 @@ public class HoaxController {
         return hoaxService.getHoaxesOfUser(username, pageable).map(HoaxVM::new);
     }
 
-    @GetMapping("/hoaxes/{id:[0-9]+}")
+    @GetMapping({"/hoaxes/{id:[0-9]+}", "/users/{username}/hoaxes/{id:[0-9]+}"})
     ResponseEntity<?> getHoaxesRelative(@PathVariable long id,
+                                        @PathVariable(required = false) String username,
                                         @RequestParam(name = "direction", defaultValue = "after") String direction,
                                         @RequestParam(name = "count", defaultValue = "false", required = false) boolean count,
                                         Pageable pageable) {
         if (!direction.equalsIgnoreCase("after")) {
-            return ResponseEntity.ok(hoaxService.getOldHoaxes(id, pageable).map(HoaxVM::new));
+            return ResponseEntity.ok(hoaxService.getOldHoaxes(id, username, pageable).map(HoaxVM::new));
         }
 
         if (count == true) {
-            return ResponseEntity.ok(Collections.singletonMap("count", hoaxService.getNewHoaxesCount(id)));
+            return ResponseEntity.ok(Collections.singletonMap("count", hoaxService.getNewHoaxesCount(id, username)));
         }
 
-        return ResponseEntity.ok(hoaxService.getNewHoaxes(id, pageable)
+        return ResponseEntity.ok(hoaxService.getNewHoaxes(id, username, pageable)
                 .stream()
                 .map(HoaxVM::new)
-                .collect(Collectors.toList()));
-    }
-
-    @GetMapping("/users/{username}/hoaxes/{id:[0-9]+}")
-    ResponseEntity<?> getHoaxesRelativeForUser(@PathVariable String username,
-                                               @PathVariable long id,
-                                               @RequestParam(name = "direction", defaultValue = "after") String direction,
-                                               @RequestParam(name = "count", defaultValue = "false", required = false) boolean count,
-                                               Pageable pageable) {
-        if (!direction.equalsIgnoreCase("after")) {
-            return ResponseEntity.ok(hoaxService.getHoaxesRelativeForUser(username, id, pageable).map(HoaxVM::new));
-        }
-
-        if (count) {
-            return ResponseEntity.ok(Collections.singletonMap("count", hoaxService.getNewHoaxesCountOfUser(id, username)));
-        }
-
-        return ResponseEntity.ok(hoaxService.getNewHoaxesOfUser(id, username, pageable)
-                .stream().map(HoaxVM::new)
                 .collect(Collectors.toList()));
     }
 
