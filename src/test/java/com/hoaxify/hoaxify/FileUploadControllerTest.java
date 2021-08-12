@@ -89,6 +89,20 @@ public class FileUploadControllerTest {
         assertThat(response.getBody().getName()).isNotEqualTo("profile.png");
     }
 
+    @Test
+    public void uploadFile_withImageFromAuthorizedUser_imageSavedTofolder() {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+
+        ResponseEntity<FileAttachment> response = uploadFile(getRequestEntity(), FileAttachment.class);
+
+        String imagePath = appConfiguration.getFullAttachmentsPath() + "/" + response.getBody().getName();
+        File storedImage = new File(imagePath);
+
+        assertThat(storedImage.exists()).isTrue();
+    }
+
+
     /*
     Private Test Helper Methods
      */
