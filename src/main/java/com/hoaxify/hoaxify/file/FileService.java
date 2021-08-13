@@ -22,8 +22,12 @@ public class FileService {
 
     Tika tika;
 
-    public FileService(AppConfiguration appConfiguration) {
+    FileAttachmentRepository fileAttachmentRepository;
+
+    public FileService(AppConfiguration appConfiguration,
+                       FileAttachmentRepository fileAttachmentRepository) {
         this.appConfiguration = appConfiguration;
+        this.fileAttachmentRepository = fileAttachmentRepository;
         this.tika = new Tika();
     }
 
@@ -51,19 +55,21 @@ public class FileService {
 
     public FileAttachment saveAttachment(MultipartFile file) {
         String randomName = getRandomName();
+        byte[] fileAsByte = new byte[0];
 
         File target = new File(appConfiguration.getFullAttachmentsPath() + "/" + randomName);
         try {
-            byte[] fileAsByte = file.getBytes();
+            fileAsByte = file.getBytes();
             FileUtils.writeByteArrayToFile(target, fileAsByte);
         } catch (IOException e) {
 
         }
 
-        return FileAttachment.builder()
+        return fileAttachmentRepository.save(FileAttachment.builder()
                 .date(new Date())
                 .name(randomName)
-                .build();
+                .fileType(detectType(fileAsByte))
+                .build());
     }
 
     @NotNull
