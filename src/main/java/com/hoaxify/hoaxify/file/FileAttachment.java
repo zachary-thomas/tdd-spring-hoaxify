@@ -1,5 +1,6 @@
 package com.hoaxify.hoaxify.file;
 
+import com.hoaxify.hoaxify.hoax.Hoax;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +26,7 @@ public class FileAttachment {
     private String name;
 
     private String fileType;
+
+    @OneToOne
+    private Hoax hoax;
 }

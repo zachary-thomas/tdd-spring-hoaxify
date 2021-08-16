@@ -1,6 +1,6 @@
 package com.hoaxify.hoaxify.hoax;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hoaxify.hoaxify.file.FileAttachment;
 import com.hoaxify.hoaxify.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,4 +33,7 @@ public class Hoax {
 
     @ManyToOne
     private User user;
+
+    @OneToOne(mappedBy = "hoax")
+    private FileAttachment attachment;
 }
