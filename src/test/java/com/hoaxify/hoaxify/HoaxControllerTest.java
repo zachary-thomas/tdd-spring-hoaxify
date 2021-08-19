@@ -9,6 +9,7 @@ import com.hoaxify.hoaxify.hoax.Hoax;
 import com.hoaxify.hoaxify.hoax.HoaxRepository;
 import com.hoaxify.hoaxify.hoax.HoaxService;
 import com.hoaxify.hoaxify.hoax.HoaxVM;
+import com.hoaxify.hoaxify.shared.GenericResponse;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserRepository;
 import com.hoaxify.hoaxify.user.UserService;
@@ -39,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -693,6 +695,47 @@ public class HoaxControllerTest {
         assertThat(response.getBody().get("count")).isEqualTo(1);
     }
 
+    @Test
+    public void deleteHoax_whenUserIsUnauthorized_receiveUnauthorized() {
+        ResponseEntity<Object> response = deleteHoax(55L, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void deleteHoax_whenUserIsAuthorized_receiveOk() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = hoaxService.save(TestUtil.createValidHoax(), user);
+
+        ResponseEntity response = deleteHoax(hoax.getId(), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void deleteHoax_whenUserIsAuthorized_receiveGenericResponse() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = hoaxService.save(TestUtil.createValidHoax(), user);
+
+        ResponseEntity<GenericResponse> response = deleteHoax(hoax.getId(), GenericResponse.class);
+
+        assertThat(response.getBody().getMessage()).isNotNull();
+    }
+
+    @Test
+    public void deleteHoax_whenUserIsAuthorized_hoaxRemovedFromDatabase() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = hoaxService.save(TestUtil.createValidHoax(), user);
+
+        deleteHoax(hoax.getId(), Object.class);
+        Optional<Hoax> inDB = hoaxRepository.findById(hoax.getId());
+
+        assertThat(inDB.isPresent()).isFalse();
+    }
+
     /*
     Private Test Helper Methods
      */
@@ -751,6 +794,10 @@ public class HoaxControllerTest {
     private <T> ResponseEntity<T> getHoaxesOfUser(String username, ParameterizedTypeReference<T> responseType) {
         String path = "/api/1.0/users/" + username + "/hoaxes";
         return testRestTemplate.exchange(path, HttpMethod.GET, null, responseType);
+    }
+
+    private <T> ResponseEntity<T> deleteHoax(long hoaxId, Class<T> responseType) {
+        return testRestTemplate.exchange(API_1_0_HOAXES + "/" + hoaxId, HttpMethod.DELETE, null, responseType);
     }
 
     private <T> ResponseEntity<T> getHoaxes(ParameterizedTypeReference<T> responseType) {

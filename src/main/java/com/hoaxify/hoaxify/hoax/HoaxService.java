@@ -86,4 +86,8 @@ public class HoaxService {
     private Specification<Hoax> idGreaterThan(long id) {
         return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.greaterThan(root.get("id"), id);
     }
+
+    public void deleteHoax(long id) {
+        hoaxRepository.deleteById(id);
+    }
 }
