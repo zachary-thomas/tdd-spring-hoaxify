@@ -736,6 +736,28 @@ public class HoaxControllerTest {
         assertThat(inDB.isPresent()).isFalse();
     }
 
+    @Test
+    public void deleteHoax_whenHoaxIsOwnedBYAnotherUser_receiveForbidden() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        User hoaxOwner = userService.save(TestUtil.createValidUser("user2"));
+        Hoax hoax = hoaxService.save(TestUtil.createValidHoax(), hoaxOwner);
+
+        ResponseEntity<Object> response = deleteHoax(hoax.getId(), Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    public void deleteHoax_whenHoaxDoesNotExist_receiveForbidden() {
+        User user = userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+
+        ResponseEntity<Object> response = deleteHoax(555L, Object.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
     /*
     Private Test Helper Methods
      */
