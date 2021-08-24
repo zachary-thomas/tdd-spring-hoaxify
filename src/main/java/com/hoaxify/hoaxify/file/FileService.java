@@ -88,15 +88,16 @@ public class FileService {
         });
     }
 
-    private String getRandomName() {
-        return UUID.randomUUID().toString().replace("-", "");
-    }
-
-    private void deleteAttachmentImage(String image) {
+    public void deleteAttachmentImage(String image) {
         try {
             Files.deleteIfExists(Paths.get(appConfiguration.getFullAttachmentsPath() + "/" + image));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private String getRandomName() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
 }

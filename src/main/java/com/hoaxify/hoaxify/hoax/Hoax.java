@@ -34,6 +34,7 @@ public class Hoax {
     @ManyToOne
     private User user;
 
-    @OneToOne(mappedBy = "hoax")
+    // When Hoax is deleted, attachment will also be removed
+    @OneToOne(mappedBy = "hoax", orphanRemoval = true)
     private FileAttachment attachment;
 }

@@ -758,6 +758,41 @@ public class HoaxControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
 
+    @Test
+    public void deleteHoax_whenHoaxHasAttachment_attachmentRemovedFromDatabase() throws IOException {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = TestUtil.createValidHoax();
+        MultipartFile file = createFile();
+        FileAttachment savedFile = fileService.saveAttachment(file);
+        hoax.setAttachment(savedFile);
+
+        ResponseEntity<HoaxVM> response = postHoax(hoax, HoaxVM.class);
+        long hoaxId = response.getBody().getId();
+        deleteHoax(hoaxId, Object.class);
+
+        Optional<FileAttachment> optionalFileAttachment = fileAttachmentRepository.findById(savedFile.getId());
+        assertThat(optionalFileAttachment.isPresent()).isFalse();
+    }
+
+    @Test
+    public void deleteHoax_whenHoaxHasAttachment_attachmentRemovedFromStorage() throws IOException {
+        userService.save(TestUtil.createValidUser("user1"));
+        authenticate("user1");
+        Hoax hoax = TestUtil.createValidHoax();
+        MultipartFile file = createFile();
+        FileAttachment savedFile = fileService.saveAttachment(file);
+        hoax.setAttachment(savedFile);
+
+        ResponseEntity<HoaxVM> response = postHoax(hoax, HoaxVM.class);
+        long hoaxId = response.getBody().getId();
+        deleteHoax(hoaxId, Object.class);
+
+        String attachmentPath = appConfiguration.getFullAttachmentsPath() + "/" + savedFile.getName();
+        File storedImage = new File(attachmentPath);
+        assertThat(storedImage.exists()).isFalse();
+    }
+
     /*
     Private Test Helper Methods
      */
