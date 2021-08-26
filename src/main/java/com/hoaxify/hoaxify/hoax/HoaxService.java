@@ -96,7 +96,7 @@ public class HoaxService {
 
     public void deleteHoax(long id) {
         Hoax hoax = hoaxRepository.getById(id);
-        if (hoax != null) {
+        if (hoax.getAttachment() != null) {
             fileService.deleteAttachmentImage(hoax.getAttachment().getName());
         }
         hoaxRepository.deleteById(id);
