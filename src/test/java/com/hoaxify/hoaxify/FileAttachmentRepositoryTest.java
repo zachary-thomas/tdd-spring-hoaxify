@@ -4,19 +4,21 @@ import com.hoaxify.hoaxify.file.FileAttachment;
 import com.hoaxify.hoaxify.file.FileAttachmentRepository;
 import com.hoaxify.hoaxify.hoax.Hoax;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@RunWith(SpringRunner.class)
+// Junit 4
+// @RunWith(SpringRunner.class)
+// Junit5
+// Don't need this since @DataJpaTest already includes this
+// @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @ActiveProfiles("test")
 class FileAttachmentRepositoryTest {

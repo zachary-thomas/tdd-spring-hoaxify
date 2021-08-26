@@ -2,15 +2,13 @@ package com.hoaxify.hoaxify;
 
 import com.hoaxify.hoaxify.configuration.AppConfiguration;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -21,7 +19,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -33,14 +30,14 @@ public class StaticResourceTest {
     @Autowired
     MockMvc mockMvc;
 
-    @After
+    @AfterEach
     public void cleanUp() throws IOException {
         FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagesPath()));
         FileUtils.cleanDirectory(new File(appConfiguration.getFullAttachmentsPath()));
     }
 
     @Test
-    public void checkStaticFolder_WhenAppIsInitialized_uploadFolderMustExist(){
+    public void checkStaticFolder_WhenAppIsInitialized_uploadFolderMustExist() {
         File uploadFolder = new File(appConfiguration.getUploadPath());
         boolean uploadFolderExists = uploadFolder.exists() && uploadFolder.isDirectory();
 
@@ -48,7 +45,7 @@ public class StaticResourceTest {
     }
 
     @Test
-    public void checkStaticFolder_whenAppIsInitialized_profileImageSubFOlderMustExist(){
+    public void checkStaticFolder_whenAppIsInitialized_profileImageSubFOlderMustExist() {
         String profileImageFolderPath = appConfiguration.getFullProfileImagesPath();
         File profileImageFolder = new File(appConfiguration.getUploadPath());
         boolean profileImageFolderExists = profileImageFolder.exists() && profileImageFolder.isDirectory();
@@ -57,7 +54,7 @@ public class StaticResourceTest {
     }
 
     @Test
-    public void checkStaticFolder_whenAppIsInitialized_attachmentsSubFolderMustExist(){
+    public void checkStaticFolder_whenAppIsInitialized_attachmentsSubFolderMustExist() {
         String attachmentsFolderPath = appConfiguration.getFullAttachmentsPath();
         File attachmentsFolder = new File(appConfiguration.getUploadPath());
         boolean attachmentsFolderExists = attachmentsFolder.exists() && attachmentsFolder.isDirectory();
@@ -73,7 +70,7 @@ public class StaticResourceTest {
         File target = new File(appConfiguration.getFullProfileImagesPath() + "/" + fileName);
         FileUtils.copyFile(source, target);
 
-        mockMvc.perform(get("/images/" + appConfiguration.getProfileImagesFolder() +"/" + fileName))
+        mockMvc.perform(get("/images/" + appConfiguration.getProfileImagesFolder() + "/" + fileName))
                 .andExpect(status().isOk());
     }
 
@@ -85,7 +82,7 @@ public class StaticResourceTest {
         File target = new File(appConfiguration.getFullAttachmentsPath() + "/" + fileName);
         FileUtils.copyFile(source, target);
 
-        mockMvc.perform(get("/images/" + appConfiguration.getAttachmentsFolder() +"/" + fileName))
+        mockMvc.perform(get("/images/" + appConfiguration.getAttachmentsFolder() + "/" + fileName))
                 .andExpect(status().isOk());
     }
 
@@ -93,7 +90,7 @@ public class StaticResourceTest {
     public void getStaticFile_whenImageDoesNotExist_receiveNotFound() throws Exception {
         mockMvc.perform(get("/images/"
                 + appConfiguration.getAttachmentsFolder()
-                + "/there-is-no-such-image.png" ))
+                + "/there-is-no-such-image.png"))
                 .andExpect(status().isNotFound());
     }
 
@@ -105,7 +102,7 @@ public class StaticResourceTest {
         File target = new File(appConfiguration.getFullAttachmentsPath() + "/" + fileName);
         FileUtils.copyFile(source, target);
 
-        MvcResult result = mockMvc.perform(get("/images/" + appConfiguration.getAttachmentsFolder() +"/" + fileName))
+        MvcResult result = mockMvc.perform(get("/images/" + appConfiguration.getAttachmentsFolder() + "/" + fileName))
                 .andReturn();
 
         String cacheControl = result.getResponse().getHeaderValue("Cache-Control").toString();
@@ -113,7 +110,6 @@ public class StaticResourceTest {
         // A year in seconds
         assertThat(cacheControl).containsIgnoringCase("max-age=31536000");
     }
-
 
 
 }

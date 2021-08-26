@@ -4,9 +4,8 @@ import com.hoaxify.hoaxify.error.ApiError;
 import com.hoaxify.hoaxify.user.User;
 import com.hoaxify.hoaxify.user.UserRepository;
 import com.hoaxify.hoaxify.user.UserService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -16,13 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class LoginControllerTest {
@@ -38,14 +35,14 @@ public class LoginControllerTest {
     @Autowired
     UserService userService;
 
-    @Before
-    public void cleanUp(){
+    @BeforeEach
+    public void cleanUp() {
         userRepository.deleteAll();
         testRestTemplate.getRestTemplate().getInterceptors().clear();
     }
 
     @Test
-    public void postLogin_withoutUserCredentials_receiveUnauthorized(){
+    public void postLogin_withoutUserCredentials_receiveUnauthorized() {
         // given
         // nothing given
 
@@ -57,7 +54,7 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withIncorrectUserCredentials_receiveUnauthorized(){
+    public void postLogin_withIncorrectUserCredentials_receiveUnauthorized() {
         // given
         authenticate();
 
@@ -69,7 +66,7 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withIncorrectUserCredentials_receiveApiError(){
+    public void postLogin_withIncorrectUserCredentials_receiveApiError() {
         // given
         // no authenticate();
 
@@ -81,7 +78,7 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withIncorrectUserCredentials_receiveApiErrorWithoutValidationErrors(){
+    public void postLogin_withIncorrectUserCredentials_receiveApiErrorWithoutValidationErrors() {
         // given
         // no authenticate();
 
@@ -93,7 +90,7 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withIncorrectUserCredentials_receiveUnauthorizedWithoutWWWAuthenticationHeader(){
+    public void postLogin_withIncorrectUserCredentials_receiveUnauthorizedWithoutWWWAuthenticationHeader() {
         // given
         authenticate();
 
@@ -105,7 +102,7 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withValidCredentials_receiveOk(){
+    public void postLogin_withValidCredentials_receiveOk() {
         User user = TestUtil.createValidUser();
 
         userService.save(user);
@@ -116,12 +113,13 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withValidCredentials_receiveLoggedInUserId(){
+    public void postLogin_withValidCredentials_receiveLoggedInUserId() {
         User inDb = userService.save(TestUtil.createValidUser());
         authenticate();
 
         ResponseEntity<Map<String, Object>> response = login(
-                new ParameterizedTypeReference<Map<String, Object>>() {}
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                }
         );
         Map<String, Object> body = response.getBody();
         Integer id = (Integer) body.get("id");
@@ -130,12 +128,13 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withValidCredentials_receiveLoggedInUserImage(){
+    public void postLogin_withValidCredentials_receiveLoggedInUserImage() {
         User inDb = userService.save(TestUtil.createValidUser());
         authenticate();
 
         ResponseEntity<Map<String, Object>> response = login(
-                new ParameterizedTypeReference<Map<String, Object>>() {}
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                }
         );
         Map<String, Object> body = response.getBody();
         String image = (String) body.get("image");
@@ -144,12 +143,13 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withValidCredentials_receiveLoggedInUserDisplayName(){
+    public void postLogin_withValidCredentials_receiveLoggedInUserDisplayName() {
         User inDb = userService.save(TestUtil.createValidUser());
         authenticate();
 
         ResponseEntity<Map<String, Object>> response = login(
-                new ParameterizedTypeReference<Map<String, Object>>() {}
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                }
         );
         Map<String, Object> body = response.getBody();
         String displayName = (String) body.get("displayName");
@@ -158,12 +158,13 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withValidCredentials_receiveLoggedInUserUsername(){
+    public void postLogin_withValidCredentials_receiveLoggedInUserUsername() {
         User inDb = userService.save(TestUtil.createValidUser());
         authenticate();
 
         ResponseEntity<Map<String, Object>> response = login(
-                new ParameterizedTypeReference<Map<String, Object>>() {}
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                }
         );
         Map<String, Object> body = response.getBody();
         String username = (String) body.get("username");
@@ -172,12 +173,13 @@ public class LoginControllerTest {
     }
 
     @Test
-    public void postLogin_withValidCredentials_notReceiveLoggedInUserPassword(){
+    public void postLogin_withValidCredentials_notReceiveLoggedInUserPassword() {
         User inDb = userService.save(TestUtil.createValidUser());
         authenticate();
 
         ResponseEntity<Map<String, Object>> response = login(
-                new ParameterizedTypeReference<Map<String, Object>>() {}
+                new ParameterizedTypeReference<Map<String, Object>>() {
+                }
         );
         Map<String, Object> body = response.getBody();
 
@@ -189,11 +191,11 @@ public class LoginControllerTest {
                 .add(new BasicAuthenticationInterceptor("test-user", "P4ssword"));
     }
 
-    public <T> ResponseEntity<T> login(Class<T> responseType){
+    public <T> ResponseEntity<T> login(Class<T> responseType) {
         return testRestTemplate.postForEntity(API_1_0_LOGIN, null, responseType);
     }
 
-    public <T> ResponseEntity<T> login(ParameterizedTypeReference<T> responseType){
+    public <T> ResponseEntity<T> login(ParameterizedTypeReference<T> responseType) {
         return testRestTemplate.exchange(API_1_0_LOGIN, HttpMethod.POST, null, responseType);
     }
 

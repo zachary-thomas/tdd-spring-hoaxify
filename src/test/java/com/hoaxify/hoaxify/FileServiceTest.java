@@ -5,15 +5,15 @@ import com.hoaxify.hoaxify.file.FileAttachment;
 import com.hoaxify.hoaxify.file.FileAttachmentRepository;
 import com.hoaxify.hoaxify.file.FileService;
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.Date;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 // Unit Tests
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public class FileServiceTest {
 
@@ -34,7 +34,10 @@ public class FileServiceTest {
     @MockBean
     FileAttachmentRepository fileAttachmentRepository;
 
-    @Before
+    // @BeforeAll - runs before all tests
+
+    // Runs before each test
+    @BeforeEach
     public void init() {
         appConfiguration = new AppConfiguration();
         appConfiguration.setUploadPath("uploads-test");
@@ -46,7 +49,7 @@ public class FileServiceTest {
         new File(appConfiguration.getFullAttachmentsPath()).mkdir();
     }
 
-    @After
+    @AfterEach
     public void cleanup() throws IOException {
         FileUtils.cleanDirectory(new File(appConfiguration.getFullProfileImagesPath()));
         FileUtils.cleanDirectory(new File(appConfiguration.getFullAttachmentsPath()));
